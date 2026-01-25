@@ -28,16 +28,18 @@ var categories = []Category{
 }
 
 func main() {
-	http.HandleFunc("/", helloHandler)
-	http.HandleFunc("/categories", getCategoriesHandler)
-	http.HandleFunc("/categories/", getCategoryHandler)
+	router := http.NewServeMux()
 
-	http.HandleFunc("/categories", postCategoriesHandler)
-	http.HandleFunc("/categories/", putCategoryHandler)
-	http.HandleFunc("/categories/", deleteCategoryHandler)
+	router.HandleFunc("GET /", helloHandler)
+	router.HandleFunc("GET /categories", getCategoriesHandler)
+	router.HandleFunc("GET /categories/{id}", getCategoryHandler)
+
+	router.HandleFunc("POST /categories", postCategoriesHandler)
+	router.HandleFunc("PUT /categories/{id}", putCategoryHandler)
+	router.HandleFunc("DELETE /categories/{id}", deleteCategoryHandler)
 
 	fmt.Println("Starting")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -75,6 +77,14 @@ func getCategoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// get last id
+	lastID := categories[len(categories)-1].ID
+
 	w.Header().Set("Content-Type", "application/json")
 
 	var category Category
@@ -83,12 +93,18 @@ func postCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	category.ID = lastID + 1
 	categories = append(categories, category)
 
 	json.NewEncoder(w).Encode(category)
 }
 
 func putCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 
 	idStr := r.PathValue("id")
@@ -106,8 +122,9 @@ func putCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	for i, c := range categories {
 		if c.ID == id {
+			category.ID = id
 			categories[i] = category
-			json.NewEncoder(w).Encode(category)
+			json.NewEncoder(w).Encode("Category updated")
 			return
 		}
 	}
@@ -116,6 +133,11 @@ func putCategoryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 
 	idStr := r.PathValue("id")
@@ -128,7 +150,7 @@ func deleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	for i, c := range categories {
 		if c.ID == id {
 			categories = append(categories[:i], categories[i+1:]...)
-			json.NewEncoder(w).Encode(c)
+			json.NewEncoder(w).Encode("Category deleted")
 			return
 		}
 	}
