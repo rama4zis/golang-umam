@@ -1,0 +1,26 @@
+package database
+
+import (
+	"database/sql"
+	"log"
+)
+
+func InitDb(connectionString string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		return nil, err
+	}
+
+	// Test connection ping
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	// set connection pool
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+
+	log.Println("Database connected successfully")
+	return db, nil
+}
