@@ -7,6 +7,9 @@ import (
 	"os"
 	"strings"
 	"task-2/database"
+	"task-2/handlers"
+	"task-2/repositories"
+	"task-2/services"
 
 	"github.com/spf13/viper"
 )
@@ -41,11 +44,15 @@ func main() {
 	addr := "0.0.0.0:" + config.Port
 	fmt.Println("Server running on ", addr)
 
-	err = http.ListenAndServe(addr, nil)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
+	// err = http.ListenAndServe(addr, nil)
+	// if err != nil {
+	// 	fmt.Println("Error: ", err)
+	// 	os.Exit(1)
+	// }
+
+	productRepo := repositories.NewProductRepository(db)
+	productService := services.NewProductService(productRepo)
+	productHandler := handlers.NewProductHandler(productService)
 
 	// Setup routes
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
