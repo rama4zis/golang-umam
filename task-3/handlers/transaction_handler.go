@@ -43,3 +43,26 @@ func (h *TransactionHandler) Checkout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(transaction)
 }
+
+// REPORT
+func (h *TransactionHandler) HandleReport(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.ReportToday(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (h *TransactionHandler) ReportToday(w http.ResponseWriter, r *http.Request) {
+	start_date := r.URL.Query().Get("start_date")
+	end_date := r.URL.Query().Get("end_date")
+	report, err := h.service.ReportToday(start_date, end_date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(report)
+}

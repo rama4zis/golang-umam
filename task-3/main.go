@@ -66,6 +66,9 @@ func main() {
 	// Transaction
 	http.HandleFunc("/api/transaction", TransactionHandlerr.HandleCheckout)
 
+	// Report
+	http.HandleFunc("/api/report", TransactionHandlerr.HandleReport)
+
 	err = http.ListenAndServe(addr, nil)
 	if err != nil {
 		fmt.Println("Error: ", err)

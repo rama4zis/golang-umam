@@ -1,6 +1,7 @@
 package services
 
 import (
+	"task-3/dto"
 	"task-3/models"
 	"task-3/repositories"
 )
@@ -15,4 +16,8 @@ func NewTransactionService(repo *repositories.TransactionRepository) *Transactio
 
 func (s *TransactionService) Checkout(items []models.CheckoutItem, useLock bool) (*models.Transaction, error) {
 	return s.repo.CreateTransaction(items)
+}
+
+func (s *TransactionService) ReportToday(start_date string, end_date string) (*dto.ReportTodayResponse, error) {
+	return s.repo.ReportToday(start_date, end_date)
 }
