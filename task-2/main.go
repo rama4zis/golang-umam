@@ -44,18 +44,26 @@ func main() {
 	addr := "0.0.0.0:" + config.Port
 	fmt.Println("Server running on ", addr)
 
-	// err = http.ListenAndServe(addr, nil)
-	// if err != nil {
-	// 	fmt.Println("Error: ", err)
-	// 	os.Exit(1)
-	// }
-
 	productRepo := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
+	categoryRepo := repositories.NewCategoryRepository(db)
+	categoryService := services.NewCategoryService(categoryRepo)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
+
 	// Setup routes
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
 	http.HandleFunc("/api/product/", productHandler.HandleProductByID)
+
+	// Category
+	http.HandleFunc("/api/category", categoryHandler.HandleCategories)
+	http.HandleFunc("/api/category/", categoryHandler.HandleCategoryByID)
+
+	err = http.ListenAndServe(addr, nil)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		os.Exit(1)
+	}
 
 }
