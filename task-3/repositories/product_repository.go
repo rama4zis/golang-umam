@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"errors"
+	"task-3/dto"
 	"task-3/models"
 )
 
@@ -14,15 +15,16 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 	return &ProductRepository{DB: db}
 }
 
-func (r *ProductRepository) GetAll() ([]models.Product, error) {
+func (r *ProductRepository) GetAll() ([]dto.ProductResponse, error) {
 	query := `SELECT
 		p.id,
 		p.name,
 		p.price,
 		p.stock,
-		c.name as category_name
+		p.category_id,
+		c.name
 	FROM products p
-	INNER JOIN categories c ON p.category_id = c.id`
+	JOIN categories c ON p.category_id = c.id`
 
 	rows, err := r.DB.Query(query)
 	if err != nil {
@@ -30,10 +32,10 @@ func (r *ProductRepository) GetAll() ([]models.Product, error) {
 	}
 	defer rows.Close()
 
-	products := make([]models.Product, 0)
+	products := make([]dto.ProductResponse, 0)
 	for rows.Next() {
-		var product models.Product
-		if err := rows.Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID.Name); err != nil {
+		var product dto.ProductResponse
+		if err := rows.Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID, &product.CategoryName); err != nil {
 			return nil, err
 		}
 		products = append(products, product)
@@ -41,29 +43,30 @@ func (r *ProductRepository) GetAll() ([]models.Product, error) {
 	return products, nil
 }
 
-func (r *ProductRepository) GetByID(id int) (models.Product, error) {
+func (r *ProductRepository) GetByID(id int) (dto.ProductResponse, error) {
 	query := `SELECT
 		p.id,
 		p.name,
 		p.price,
 		p.stock,
-		c.name as category_name
+		p.category_id,
+		c.name
 	FROM products p
-	INNER JOIN categories c ON p.category_id = c.id
+	JOIN categories c ON p.category_id = c.id
 	WHERE p.id = $1`
 
 	row := r.DB.QueryRow(query, id)
 
-	var product models.Product
-	if err := row.Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID.Name); err != nil {
-		return models.Product{}, err
+	var product dto.ProductResponse
+	if err := row.Scan(&product.ID, &product.Name, &product.Price, &product.Stock, &product.CategoryID, &product.CategoryName); err != nil {
+		return dto.ProductResponse{}, err
 	}
 	return product, nil
 }
 
 func (r *ProductRepository) Create(product *models.Product) error {
 	query := `INSERT INTO products (name, price, stock, category_id) VALUES ($1, $2, $3, $4)`
-	result, err := r.DB.Exec(query, product.Name, product.Price, product.Stock, product.CategoryID.ID)
+	result, err := r.DB.Exec(query, product.Name, product.Price, product.Stock, product.CategoryID)
 	if err != nil {
 		return err
 	}
@@ -82,7 +85,7 @@ func (r *ProductRepository) Create(product *models.Product) error {
 
 func (r *ProductRepository) Update(product *models.Product) error {
 	query := `UPDATE products SET name = $1, price = $2, stock = $3, category_id = $4 WHERE id = $5`
-	result, err := r.DB.Exec(query, product.Name, product.Price, product.Stock, product.CategoryID.ID, product.ID)
+	result, err := r.DB.Exec(query, product.Name, product.Price, product.Stock, product.CategoryID, product.ID)
 	if err != nil {
 		return err
 	}

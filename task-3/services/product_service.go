@@ -1,6 +1,7 @@
 package services
 
 import (
+	"task-3/dto"
 	"task-3/models"
 	"task-3/repositories"
 )
@@ -13,11 +14,11 @@ func NewProductService(repo *repositories.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) GetAll() ([]models.Product, error) {
+func (s *ProductService) GetAll() ([]dto.ProductResponse, error) {
 	return s.repo.GetAll()
 }
 
-func (s *ProductService) GetByID(id int) (models.Product, error) {
+func (s *ProductService) GetByID(id int) (dto.ProductResponse, error) {
 	return s.repo.GetByID(id)
 }
 

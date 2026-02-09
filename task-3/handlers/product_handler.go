@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -31,7 +32,8 @@ func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) 
 func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	products, err := h.service.GetAll()
 	if err != nil {
-		http.Error(w, "Failed to get products", http.StatusInternalServerError)
+		http.Error(w, "Failed to get products, ", http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
 
@@ -43,6 +45,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
 	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		log.Println(err)
 		return
 	}
 
@@ -53,7 +56,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(product)
+	json.NewEncoder(w).Encode("Product created successfully")
 }
 
 func (h *ProductHandler) HandleProductByID(w http.ResponseWriter, r *http.Request) {

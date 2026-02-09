@@ -53,7 +53,7 @@ func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(category)
+	json.NewEncoder(w).Encode("Category created successfully")
 }
 
 func (h *CategoryHandler) HandleCategoryByID(w http.ResponseWriter, r *http.Request) {
