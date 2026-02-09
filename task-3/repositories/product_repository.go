@@ -15,7 +15,7 @@ func NewProductRepository(db *sql.DB) *ProductRepository {
 	return &ProductRepository{DB: db}
 }
 
-func (r *ProductRepository) GetAll() ([]dto.ProductResponse, error) {
+func (r *ProductRepository) GetAll(name string) ([]dto.ProductResponse, error) {
 	query := `SELECT
 		p.id,
 		p.name,
@@ -26,7 +26,14 @@ func (r *ProductRepository) GetAll() ([]dto.ProductResponse, error) {
 	FROM products p
 	JOIN categories c ON p.category_id = c.id`
 
-	rows, err := r.DB.Query(query)
+	args := []interface{}{}
+
+	if name != "" {
+		query += " WHERE p.name LIKE $1"
+		args = append(args, "%"+name+"%")
+	}
+
+	rows, err := r.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

@@ -50,6 +50,11 @@ func main() {
 	categoryService := services.NewCategoryService(categoryRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 
+	// Transaction
+	transactionRepo := repositories.NewTransactionRepository(db)
+	transactionService := services.NewTransactionService(transactionRepo)
+	TransactionHandlerr := handlers.NewTransactionHandler(transactionService)
+
 	// Setup routes
 	http.HandleFunc("/api/product", productHandler.HandleProducts)
 	http.HandleFunc("/api/product/", productHandler.HandleProductByID)
@@ -57,6 +62,9 @@ func main() {
 	// Category
 	http.HandleFunc("/api/category", categoryHandler.HandleCategories)
 	http.HandleFunc("/api/category/", categoryHandler.HandleCategoryByID)
+
+	// Transaction
+	http.HandleFunc("/api/transaction", TransactionHandlerr.HandleCheckout)
 
 	err = http.ListenAndServe(addr, nil)
 	if err != nil {

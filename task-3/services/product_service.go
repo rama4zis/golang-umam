@@ -14,8 +14,8 @@ func NewProductService(repo *repositories.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) GetAll() ([]dto.ProductResponse, error) {
-	return s.repo.GetAll()
+func (s *ProductService) GetAll(name string) ([]dto.ProductResponse, error) {
+	return s.repo.GetAll(name)
 }
 
 func (s *ProductService) GetByID(id int) (dto.ProductResponse, error) {
